@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Off-Site Work Record</title>
+  <style>
+    body { font-size: 250%; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    .container { text-align:center; width: 95%; max-width: 640px; }
+    .logo { width: 720px; max-width: 85vw; margin-bottom: 20px; }
+    input, select { font-size: 1em; margin-bottom: 0.5em; width: 100%; padding: 0.4em; box-sizing: border-box;
+      border: 2px solid #555; border-radius: 6px; -webkit-appearance: none; appearance: none; background-color: #fff; }
+    input:focus, select:focus { outline: none; border-color: #007BFF; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
+    button { font-size: 1em; padding: 0.5em 1em; margin-top: 0.6em; width: 100%; }
+    #status { margin-top: 10px; min-height: 1.3em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="https://i.imgur.com/AbyTxH1.png" alt="Logo" />
+    <h2>
+      <div>Off-Site Work Record</div>
+      <div>外出工作记录</div>
+    </h2>
+
+    <!-- Form direct to GAS (posts to hidden iframe) -->
+    <form id="recordForm" method="POST" action="https://script.google.com/macros/s/AKfycbzpFJcxkhnq2Y5b2KzCwdV2Gvs8OOalapkwqxbVwDQdNnBzbYzvDk-2lSRqO7cu3jQ7hA/exec" target="hidden_iframe">
+      <!-- bilingual labels kept -->
+      <label>Name 名字：
+        <input type="text" name="name" id="name" placeholder="Enter Your Name" required />
+      </label><br>
+
+      <label>Mission 任务：
+        <select name="task" id="task" required>
+          <option value="">Select Mission ▽</option>
+          <option>Installation 安装</option>
+          <option>Positioning 排货</option>
+          <option>Repairing 维修</option>
+          <option>Construction 施工</option>
+          <option>Modification 修改</option>
+          <option>Measuring 量尺寸</option>
+          <option>Servicing 维护</option>
+          <option>Delivery To 送货</option>
+          <option>Get From 取货</option>
+        </select>
+      </label><br>
+
+      <label>Customer 客户/Supplier 供应商：
+        <input type="text" name="customer" id="customer" placeholder="Customer/Supplier Name" required />
+      </label><br>
+
+      <!-- hidden geolocation fields -->
+      <input type="hidden" name="lat" id="lat" />
+      <input type="hidden" name="lng" id="lng" />
+
+      <button type="submit" id="submitBtn" disabled>Save Record</button>
+    </form>
+
+    <p id="status"></p>
+
+    <!-- hidden iframe to receive doPost reply -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const btn = document.getElementById('submitBtn');
+    const form = document.getElementById('recordForm');
+
+    let gotLocation = false;
+    function enableWhenReady() {
+      btn.disabled = !(gotLocation);
+    }
+    function setStatus(msg, color) {
+      statusEl.textContent = msg || '';
+      statusEl.style.color = color || '#333';
+    }
+
+    // English-only status messages kept
+    setStatus('📍 Getting location...');
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          document.getElementById('lat').value = String(lat);
+          document.getElementById('lng').value = String(lng);
+          gotLocation = true;
+          enableWhenReady();
+          setStatus('✅ Location ready. Please fill in the form and submit.', 'green');
+        },
+        (err) => {
+          setStatus('⚠️ Please allow Location permission in your phone settings and refresh this page.', 'orangered');
+          gotLocation = false;
+          enableWhenReady();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setStatus('❌ Geolocation is not supported by this browser.', 'red');
+    }
+
+    // submit via hidden iframe
+    let waitTimer = null;
+    form.addEventListener('submit', function (e) {
+      if (!gotLocation) {
+        e.preventDefault();
+        alert('📍 Location is not ready yet, please wait.');
+        return;
+      }
+      setStatus('⏳ Submitting...');
+      btn.disabled = true;
+
+      // timeout fallback
+      waitTimer = setTimeout(() => {
+        setStatus('❌ Submission timeout. Please try again or check network/GAS deployment.', 'red');
+        btn.disabled = false;
+      }, 10000);
+    });
+
+    // receive postMessage from GAS (OK / ERROR)
+    window.addEventListener('message', function (event) {
+      const okOrigin = /^(https:\/\/script\.googleusercontent\.com|https:\/\/script\.google\.com)/;
+      if (!okOrigin.test(event.origin)) return;
+
+      clearTimeout(waitTimer);
+      if (String(event.data).indexOf('OK') === 0) {
+        setStatus('✅ Record saved successfully!', 'green');
+        btn.disabled = true;
+        form.reset();
+        gotLocation = false;
+      } else {
+        setStatus('❌ Save failed: ' + event.data, 'red');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
