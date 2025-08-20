@@ -112,14 +112,14 @@
           document.getElementById('lng').value = String(lng);
           gotLocation = true;
           enableWhenReady();
-          setStatus('Location ready. Please fill in the form and submit.', 'grey');
+          setStatus('Location ready. Please fill in the form and submit.', 'purple');
         },
         (err) => {
           setStatus('⚠️ Please allow Location permission in your phone settings and refresh this page.', 'orangered');
           gotLocation = false;
           enableWhenReady();
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     } else {
       setStatus('❌ Geolocation is not supported by this browser.', 'red');
@@ -138,9 +138,9 @@
 
       // timeout fallback (延长到 30 秒)
       waitTimer = setTimeout(() => {
-        setStatus('❌ Submission timeout. Please try again or check network/GAS deployment.', 'red');
+        setStatus('❌ Submission timeout. Please try again or check network', 'red');
         btn.disabled = false;
-      }, 10000);
+      }, 5000);
     });
 
     // receive postMessage from GAS (OK / ERROR)
