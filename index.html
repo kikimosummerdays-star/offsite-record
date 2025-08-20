@@ -6,17 +6,19 @@
   <title>Off-Site Work Record</title>
   <style>
     body {
-      font-size: 1.2rem; /* 原来 250% -> 改为更合理的自适应字号 */
+      font-size: 1.2rem;
       display:flex;
       justify-content:center;
-      align-items:center;
+      align-items:flex-start; /* 内容整体靠上 */
       height:100vh;
       margin:0;
+      padding-top: 30px; /* 上方留点空隙 */
     }
     .container { text-align:center; width: 95%; max-width: 640px; }
-    .logo { width: 100%; max-width: 480px; margin-bottom: 20px; } /* 原来 width:720px 改为自适应 */
+    .logo { width: 100%; max-width: 480px; margin-bottom: 10px; } 
+    h2 { margin: 10px 0 25px 0; } /* 标题往上靠，同时和表单拉开 */
     input, select {
-      font-size: 1rem; /* 原 1em 调整为 1rem，跟随上面的根字号 */
+      font-size: 1rem;
       margin-bottom: 0.5em;
       width: 100%;
       padding: 0.4em;
@@ -29,11 +31,16 @@
     }
     input:focus, select:focus { outline: none; border-color: #007BFF; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
 
-    /* === 按钮样式：更立体、可点击 === */
+    form label {
+      display:block;
+      margin-bottom: 0.8em; /* 输入项之间留更舒适间距 */
+    }
+
+    /* === 按钮样式 === */
     button {
       font-size: 1rem;
       padding: 0.75em 1em;
-      margin-top: 0.6em;
+      margin-top: 1.2em; /* 按钮和输入区分开一点 */
       width: 100%;
       border: 1px solid #0069d9;
       border-radius: 10px;
@@ -62,11 +69,9 @@
       box-shadow: none;
       cursor: not-allowed;
     }
-    /* === 按钮样式结束 === */
 
     #status { margin-top: 10px; min-height: 1.3em; }
 
-    /* 大屏放大一些，接近你原来的视觉比例 */
     @media (min-width: 768px) {
       body { font-size: 1.6rem; }
       .logo { max-width: 720px; }
@@ -82,12 +87,11 @@
       <div>外出工作记录</div>
     </h2>
 
-    <!-- Form direct to GAS (posts to hidden iframe) -->
+    <!-- Form direct to GAS -->
     <form id="recordForm" method="POST" action="https://script.google.com/macros/s/AKfycbzpFJcxkhnq2Y5b2KzCwdV2Gvs8OOalapkwqxbVwDQdNnBzbYzvDk-2lSRqO7cu3jQ7hA/exec" target="hidden_iframe">
-      <!-- bilingual labels kept -->
       <label>Name 名字：
         <input type="text" name="name" id="name" placeholder="Enter Your Name" required />
-      </label><br>
+      </label>
 
       <label>Mission 任务：
         <select name="task" id="task" required>
@@ -102,13 +106,12 @@
           <option>Delivery To 送货</option>
           <option>Get From 取货</option>
         </select>
-      </label><br>
+      </label>
 
       <label>Customer 客户/Supplier 供应商：
         <input type="text" name="customer" id="customer" placeholder="Customer/Supplier Name" required />
-      </label><br>
+      </label>
 
-      <!-- hidden geolocation fields -->
       <input type="hidden" name="lat" id="lat" />
       <input type="hidden" name="lng" id="lng" />
 
@@ -116,8 +119,6 @@
     </form>
 
     <p id="status"></p>
-
-    <!-- hidden iframe to receive doPost reply -->
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   </div>
 
@@ -127,15 +128,12 @@
     const form = document.getElementById('recordForm');
 
     let gotLocation = false;
-    function enableWhenReady() {
-      btn.disabled = !(gotLocation);
-    }
+    function enableWhenReady() { btn.disabled = !(gotLocation); }
     function setStatus(msg, color) {
       statusEl.textContent = msg || '';
       statusEl.style.color = color || '#333';
     }
 
-    // English-only status messages kept
     setStatus('📍 Getting location...');
 
     if (navigator.geolocation) {
@@ -160,7 +158,6 @@
       setStatus('❌ Geolocation is not supported by this browser.', 'red');
     }
 
-    // submit via hidden iframe
     let waitTimer = null;
     form.addEventListener('submit', function (e) {
       if (!gotLocation) {
@@ -170,19 +167,14 @@
       }
       setStatus('⏳ Submitting...');
       btn.disabled = true;
-
-      // timeout fallback (延长到 30 秒)
       waitTimer = setTimeout(() => {
         setStatus('❌ Submission timeout. Please try again or check network', 'red');
         btn.disabled = false;
       }, 10000);
     });
 
-    // receive postMessage from GAS (OK / ERROR)
     window.addEventListener('message', function (event) {
-      // 修改：放宽限制，只要来自 google 域名就接受
       if (!event.origin.includes('google')) return;
-
       clearTimeout(waitTimer);
       if (String(event.data).indexOf('OK') === 0) {
         setStatus('✅ Record saved successfully!', 'green');
@@ -197,5 +189,6 @@
   </script>
 </body>
 </html>
+
 
 
