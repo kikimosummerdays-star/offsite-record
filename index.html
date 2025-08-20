@@ -112,7 +112,7 @@
           document.getElementById('lng').value = String(lng);
           gotLocation = true;
           enableWhenReady();
-          setStatus('✅ Location ready. Please fill in the form and submit.', 'green');
+          setStatus('✅ Location ready. Please fill in the form and submit.', 'brown');
         },
         (err) => {
           setStatus('⚠️ Please allow Location permission in your phone settings and refresh this page.', 'orangered');
@@ -140,7 +140,7 @@
       waitTimer = setTimeout(() => {
         setStatus('❌ Submission timeout. Please try again or check network/GAS deployment.', 'red');
         btn.disabled = false;
-      }, 30000);
+      }, 10000);
     });
 
     // receive postMessage from GAS (OK / ERROR)
