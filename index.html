@@ -5,14 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Off-Site Work Record</title>
   <style>
-    body { font-size: 250%; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    body {
+      font-size: 1.2rem; /* 原来 250% -> 改为更合理的自适应字号 */
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+    }
     .container { text-align:center; width: 95%; max-width: 640px; }
-    .logo { width: 720px; max-width: 85vw; margin-bottom: 20px; }
-    input, select { font-size: 1em; margin-bottom: 0.5em; width: 100%; padding: 0.4em; box-sizing: border-box;
-      border: 2px solid #555; border-radius: 6px; -webkit-appearance: none; appearance: none; background-color: #fff; }
+    .logo { width: 100%; max-width: 480px; margin-bottom: 20px; } /* 原来 width:720px 改为自适应 */
+    input, select {
+      font-size: 1rem; /* 原 1em 调整为 1rem，跟随上面的根字号 */
+      margin-bottom: 0.5em;
+      width: 100%;
+      padding: 0.4em;
+      box-sizing: border-box;
+      border: 2px solid #555;
+      border-radius: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+    }
     input:focus, select:focus { outline: none; border-color: #007BFF; box-shadow: 0 0 5px rgba(0,123,255,0.5); }
-    button { font-size: 1em; padding: 0.5em 1em; margin-top: 0.6em; width: 100%; }
+    button { font-size: 1rem; padding: 0.5em 1em; margin-top: 0.6em; width: 100%; }
     #status { margin-top: 10px; min-height: 1.3em; }
+
+    /* 大屏放大一些，接近你原来的视觉比例 */
+    @media (min-width: 768px) {
+      body { font-size: 1.6rem; }
+      .logo { max-width: 720px; }
+      input, select, button { font-size: 1.1rem; }
+    }
   </style>
 </head>
 <body>
@@ -112,7 +136,7 @@
       setStatus('⏳ Submitting...');
       btn.disabled = true;
 
-      // timeout fallback
+      // timeout fallback (延长到 30 秒)
       waitTimer = setTimeout(() => {
         setStatus('❌ Submission timeout. Please try again or check network/GAS deployment.', 'red');
         btn.disabled = false;
@@ -121,8 +145,8 @@
 
     // receive postMessage from GAS (OK / ERROR)
     window.addEventListener('message', function (event) {
-      const okOrigin = /^(https:\/\/script\.googleusercontent\.com|https:\/\/script\.google\.com)/;
-      if (!okOrigin.test(event.origin)) return;
+      // 修改：放宽限制，只要来自 google 域名就接受
+      if (!event.origin.includes('google')) return;
 
       clearTimeout(waitTimer);
       if (String(event.data).indexOf('OK') === 0) {
@@ -138,3 +162,4 @@
   </script>
 </body>
 </html>
+
