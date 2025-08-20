@@ -116,7 +116,7 @@
       waitTimer = setTimeout(() => {
         setStatus('❌ Submission timeout. Please try again or check network/GAS deployment.', 'red');
         btn.disabled = false;
-      }, 10000);
+      }, 30000);
     });
 
     // receive postMessage from GAS (OK / ERROR)
