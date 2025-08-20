@@ -154,7 +154,7 @@
           gotLocation = false;
           enableWhenReady();
         },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
       setStatus('❌ Geolocation is not supported by this browser.', 'red');
@@ -175,7 +175,7 @@
       waitTimer = setTimeout(() => {
         setStatus('❌ Submission timeout. Please try again or check network', 'red');
         btn.disabled = false;
-      }, 5000);
+      }, 10000);
     });
 
     // receive postMessage from GAS (OK / ERROR)
