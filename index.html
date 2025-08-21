@@ -128,24 +128,10 @@
     const form = document.getElementById('recordForm');
 
     let gotLocation = false;
-    let lastLat = null, lastLng = null;
     function enableWhenReady() { btn.disabled = !(gotLocation); }
     function setStatus(msg, color) {
       statusEl.textContent = msg || '';
       statusEl.style.color = color || '#333';
-    }
-
-    // 计算两点间距离（米）
-    function haversine(lat1, lon1, lat2, lon2) {
-      const R = 6371000;
-      const toRad = (x) => x * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2) ** 2 +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon/2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
     }
 
     setStatus('📍 Getting location...');
@@ -153,27 +139,13 @@
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
-          const lat = parseFloat(pos.coords.latitude.toFixed(6));
-          const lng = parseFloat(pos.coords.longitude.toFixed(6));
+          const lat = pos.coords.latitude.toFixed(6);
+          const lng = pos.coords.longitude.toFixed(6);
           document.getElementById('lat').value = lat;
           document.getElementById('lng').value = lng;
-
-          if (lastLat !== null && lastLng !== null) {
-            const dist = haversine(lastLat, lastLng, lat, lng);
-            if (dist < 5) {
-              gotLocation = true;
-              enableWhenReady();
-              setStatus(`✅ Location stable: ${lat}, ${lng}`, 'green');
-            } else {
-              gotLocation = false;
-              enableWhenReady();
-              setStatus(`📍 Getting stable location... (${dist.toFixed(1)}m diff)`, 'orange');
-            }
-          } else {
-            setStatus(`📍 First fix: ${lat}, ${lng} (waiting stable...)`, 'purple');
-          }
-          lastLat = lat;
-          lastLng = lng;
+          gotLocation = true;
+          enableWhenReady();
+          setStatus(`Location ready: ${lat}, ${lng}`, 'purple');
         },
         (err) => {
           setStatus('⚠️ Please allow Location permission in your phone settings and refresh this page.', 'orangered');
@@ -190,7 +162,7 @@
     form.addEventListener('submit', function (e) {
       if (!gotLocation) {
         e.preventDefault();
-        alert('📍 Location not stable yet, please wait.');
+        alert('📍 Location is not ready yet, please wait.');
         return;
       }
       setStatus('⏳ Submitting...');
@@ -217,6 +189,7 @@
   </script>
 </body>
 </html>
+
 
 
 
