@@ -169,7 +169,7 @@
           document.getElementById('lng').value = String(lng);
           gotLocation = true;
           enableWhenReady();
-          setStatus('Location ready. Please fill in the form and submit.', 'purple');
+          setStatus('Location ready.', 'purple');
         },
         (err) => {
           setStatus('⚠️ Please allow Location permission in your phone settings and refresh this page.', 'orangered');
